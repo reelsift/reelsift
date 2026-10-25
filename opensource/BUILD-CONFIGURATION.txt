@@ -1,0 +1,34 @@
+ReelSift — build configuration of the bundled FFmpeg (ffmpeg / ffprobe)
+=====================================================================
+
+Source (unmodified, no patches applied):
+  FFmpeg 7.1     ffmpeg-7.1.tar.xz      (official release, https://ffmpeg.org/releases/)
+  dav1d  1.4.3   dav1d-1.4.3.tar.gz    (official release, https://code.videolan.org/videolan/dav1d)
+
+Targets:
+  macOS 13.0 or later, built separately for arm64 and x86_64 and combined with lipo (universal binary).
+
+dav1d (static library, built with meson/ninja):
+  meson setup <build> <src> --cross-file <cross-file> \
+      --default-library=static --buildtype=release \
+      -Denable_tools=false -Denable_tests=false \
+      --prefix=<prefix> --libdir=lib
+  (cross file: clang -arch <arch>, -mmacosx-version-min=13.0)
+
+FFmpeg configure options (LGPL build, no GPL and no non-free components):
+  --disable-gpl --disable-nonfree
+  --enable-videotoolbox --enable-audiotoolbox
+  --enable-libdav1d
+  --disable-ffplay --disable-doc --disable-network
+  --disable-debug --enable-small
+  --disable-sdl2 --disable-securetransport --disable-xlib --disable-libxcb
+  --arch=<arm64|x86_64> --target-os=darwin --enable-cross-compile
+  --cc="clang -arch <arch>"
+  --pkg-config=pkg-config --pkg-config-flags=--static
+  --extra-cflags="-mmacosx-version-min=13.0"
+  --extra-ldflags="-mmacosx-version-min=13.0"
+  --prefix=<prefix>
+
+Programs used by ReelSift: ffmpeg, ffprobe (bundled as separate executables inside the app).
+
+The exact commands are in build_ffmpeg_lgpl.sh (same folder).
